@@ -116,9 +116,29 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
 
             Vector<Integer> post = new Vector<>();
 
-            for (String word : strings) {
+            int docIdPos = 0;
+            int lastDocId = 0;
+            int lastOcc = 0;
+            int num;
+            for (int i = 0; i < strings.size(); i++) {
+              String word = strings.get(i);
               int scn = Integer.parseInt(word);
-              post.add(scn);
+
+              if (i == docIdPos) {
+                num = scn - lastDocId;
+                lastDocId = scn;
+                lastOcc = 0;
+              }
+              else if (i == docIdPos + 1) {
+                num = scn;
+                docIdPos += scn + 2;
+              }
+              else {
+                num = scn - lastOcc;
+                lastOcc = scn;
+              }
+
+              post.add(num);
             }
 
             Vector<Byte> bytes3 = IndexCompressor.vByteEncoder(post);
@@ -568,7 +588,7 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
       return -1;
     }
     if(PostingList.get(0)>current){
-      return PostingList.get(0);
+      return 0;
     }
     return binarySearch(PostingList,SkipList,0,lt,current);
   }
@@ -668,9 +688,27 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
 
         Vector<Integer> termPostingList = new Vector<>();
 
+        int docIdPos = i+2;
+        int lastDocId = 0;
+        int lastOcc = 0;
+        Integer num;
         int j;
         for (j = i+2; j < i+2+postingSize; j++) {
-          termPostingList.add(numbers.get(j));
+
+          if (j == docIdPos) {
+            num = numbers.get(j) + lastDocId;
+            lastDocId = num;
+            lastOcc = 0;
+          }
+          else if (j == docIdPos + 1) {
+            num = numbers.get(j);
+            docIdPos += numbers.get(j) + 2;
+          }
+          else {
+            num = numbers.get(j) + lastOcc;
+            lastOcc = num;
+          }
+          termPostingList.add(num);
         }
 
         _postings.put(termId, termPostingList);

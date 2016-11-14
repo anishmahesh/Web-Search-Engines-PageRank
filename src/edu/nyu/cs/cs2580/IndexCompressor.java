@@ -1,9 +1,8 @@
 package edu.nyu.cs.cs2580;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
-import java.util.Scanner;
+import java.nio.file.Files;
 import java.util.Vector;
 
 /**
@@ -64,18 +63,18 @@ public class IndexCompressor {
     }
 
     public static void main(String args[]) throws IOException {
-        Vector<Integer> vecInt = new Vector<Integer>();
-        vecInt.add(44);
-        vecInt.add(209);
-        vecInt.add(123213);
-        vecInt.add(857);
-        vecInt.add(93939);
-        Vector<Byte> b= vByteEncoder(vecInt);
-        for (byte b1 : b) {
-            System.out.println(Integer.toBinaryString(b1 & 255 | 256).substring(1));
-        }
-
-        System.out.println(vByteDecoder(b));
+//        Vector<Integer> vecInt = new Vector<Integer>();
+//        vecInt.add(44);
+//        vecInt.add(209);
+//        vecInt.add(123213);
+//        vecInt.add(857);
+//        vecInt.add(93939);
+//        Vector<Byte> b= vByteEncoder(vecInt);
+//        for (byte b1 : b) {
+//            System.out.println(Integer.toBinaryString(b1 & 255 | 256).substring(1));
+//        }
+//
+//        System.out.println(vByteDecoder(b));
 
 
 //        BufferedWriter bf = new BufferedWriter(new FileWriter("data/abc.tsv", true));
@@ -86,24 +85,20 @@ public class IndexCompressor {
 //
 //        bf.close();
 
-        BufferedReader br = new BufferedReader(new FileReader("data/abc.tsv"));
+        String fileName = "data/index/index-comp-part-145.tsv";
 
-        String s = br.readLine();
-        Scanner scanner = new Scanner(s);
+        byte[] bytes = Files.readAllBytes(new File(fileName).toPath());
+
 
         Vector<Byte> vb = new Vector<>();
-        while (scanner.hasNext()) {
-            String next = scanner.next();
-            vb.add(Byte.parseByte(next));
+        for (byte b : bytes) {
+            vb.add(b);
         }
 
+        Vector<Integer> numbers = IndexCompressor.vByteDecoder(vb);
 
+        System.out.println(numbers);
 
-
-
-        System.out.println(vByteDecoder(vb));
-
-        br.close();
 
     }
 
