@@ -1,14 +1,10 @@
 package edu.nyu.cs.cs2580;
 
-import java.io.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
 import edu.nyu.cs.cs2580.SearchEngine.Options;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @CS2580: Implement this class for HW3.
