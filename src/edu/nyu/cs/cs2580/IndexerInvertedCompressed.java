@@ -81,6 +81,50 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
     return tokenList;
   }
 
+  public void compressDocTermFile(String dir, int docid, Vector<Integer> termIds) throws IOException {
+
+    OutputStream os = new FileOutputStream(dir + "/" + docid, true);
+
+    Vector<Byte> bytes1 = IndexCompressor.vByteEncoder(docid);
+
+    byte[] bArr1 = new byte[bytes1.size()];
+
+    for (int i = 0 ; i < bArr1.length; i++) {
+      bArr1[i] = bytes1.get(i);
+    }
+
+    os.write(bArr1);
+
+    Vector<Integer> terms = new Vector<>();
+
+    int lastTerm = 0;
+    int num;
+    int i = 0;
+    while (i < termIds.size()){
+      int offset = termIds.get(i);
+
+      num = offset - lastTerm;
+      lastTerm = offset;
+
+      terms.add(num);
+      terms.add(termIds.get(i+1));
+
+      i += 2;
+    }
+
+    Vector<Byte> bytes3 = IndexCompressor.vByteEncoder(terms);
+
+    byte[] bArr3 = new byte[bytes3.size()];
+
+    for (int j = 0 ; j < bArr3.length; j++) {
+      bArr3[j] = bytes3.get(j);
+    }
+
+    os.write(bArr3);
+
+    os.close();
+  }
+
   public void compressMergedFiles(String dir) throws IOException {
 
     for (int part = 0; part <= partCount; part++) {
@@ -178,8 +222,14 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
   }
 
   private void deleteExistingFile(String indexDir) {
-    for(File file: new File(indexDir).listFiles())
+    for(File file: new File(indexDir).listFiles()) {
+      if (file.isDirectory()) {
+        for (File subFile : file.listFiles()) {
+          subFile.delete();
+        }
+      }
       file.delete();
+    }
   }
 
   private void processFiles(String dir) throws IOException {
@@ -195,6 +245,13 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
         if (file.isFile() && !file.isHidden()) {
           HTMLDocument htmlDocument = htmlParse.getDocument(file);
           DocumentIndexed doc = new DocumentIndexed(_documents.size());
+
+          String docsDir = _options._indexPrefix + "/Documents";
+          File directory = new File(docsDir);
+
+          if (!directory.exists()) {
+            directory.mkdir();
+          }
 
           processDocument(htmlDocument.getBodyText(), doc);
 
@@ -363,7 +420,7 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
     _postings.clear();
   }
 
-  private void processDocument(String content, DocumentIndexed doc) {
+  private void processDocument(String content, DocumentIndexed doc) throws IOException {
     Scanner s = new Scanner(content);
 
     Map<String, Vector<Integer>> termOccurenceMap = new HashMap<>();
@@ -393,6 +450,8 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
 
     doc.setTotalTerms(offset);
 
+    Vector<Integer> termIds = new Vector<>();
+
     for (String token : termOccurenceMap.keySet()) {
       int idx;
       if (_dictionary.containsKey(token)) {
@@ -403,6 +462,9 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
         _dictionary.put(token, idx);
       }
 
+      termIds.add(idx);
+      termIds.add(termOccurenceMap.get(token).get(1));
+
       if (_postings.containsKey(idx)) {
         _postings.get(idx).addAll(termOccurenceMap.get(token));
       }
@@ -411,6 +473,11 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
       }
 
     }
+
+    String docsDir = _options._indexPrefix + "/Documents";
+
+    compressDocTermFile(docsDir, doc._docid, termIds);
+
     s.close();
   }
 
