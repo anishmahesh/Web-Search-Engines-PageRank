@@ -133,8 +133,8 @@ public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
   }
 
 
-  public Object loadPageRanks() throws IOException{
-    Map<String,Float> pageRankMap = new HashMap<>();
+  public Map<String, Double> loadPageRanks() throws IOException{
+    Map<String,Double> pageRankMap = new HashMap<>();
     FileReader fr = new FileReader(_outFilePath);
     BufferedReader br = new BufferedReader(fr);
 
@@ -142,7 +142,7 @@ public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
     while((line = br.readLine()) !=null){
       String[] tokens = line.split("\t");
       String docName = tokens[0];
-      float rank = Float.parseFloat(tokens[1]);
+      double rank = Double.parseDouble(tokens[1]);
       pageRankMap.put(docName,rank);
     }
     return  pageRankMap;
@@ -155,7 +155,7 @@ public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
    * @throws IOException
    */
   @Override
-  public Object load() throws IOException {
+  public Map<String, Double> load() throws IOException {
     System.out.println("Loading using " + this.getClass().getName());
     return loadPageRanks();
   }
