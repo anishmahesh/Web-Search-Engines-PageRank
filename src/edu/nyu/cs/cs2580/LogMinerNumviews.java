@@ -11,7 +11,7 @@ import java.util.Map;
  */
 public class LogMinerNumviews extends LogMiner {
 
-  private Map<String, Integer> numViews = new HashMap<>();
+  private Map<String, Double> numViews = new HashMap<>();
 
   public LogMinerNumviews(Options options) {
     super(options);
@@ -77,7 +77,7 @@ public class LogMinerNumviews extends LogMiner {
   private void retrieveDocuments() {
     for (File file : new File(_options._corpusPrefix).listFiles()) {
       if (!file.isDirectory() && !file.isHidden()) {
-        numViews.put(file.getName(), 0);
+        numViews.put(file.getName(), 0.0 );
       }
     }
   }
@@ -89,14 +89,14 @@ public class LogMinerNumviews extends LogMiner {
    * @throws IOException
    */
   @Override
-  public Map<String, Integer> load() throws IOException {
+  public Map<String, Double> load() throws IOException {
     System.out.println("Loading using " + this.getClass().getName());
     BufferedReader bufferedReader = new BufferedReader(new FileReader(_options._indexPrefix + "/numViews.tsv"));
     String line;
     String splits[];
     while ((line = bufferedReader.readLine()) != null) {
       splits = line.split("\t");
-      numViews.put(splits[0], Integer.parseInt(splits[1]));
+      numViews.put(splits[0], Double.parseDouble(splits[1]));
     }
     return numViews;
   }
@@ -104,7 +104,7 @@ public class LogMinerNumviews extends LogMiner {
   public static void main(String args[]) throws IOException {
     LogMinerNumviews log = new LogMinerNumviews(new Options("conf/engine.conf"));
     log.compute();
-    Map<String, Integer> load = log.load();
+    Map<String, Double> load = log.load();
     System.out.println();
   }
 }
