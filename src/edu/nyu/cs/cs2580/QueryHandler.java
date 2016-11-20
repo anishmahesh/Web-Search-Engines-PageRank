@@ -20,7 +20,6 @@ import edu.nyu.cs.cs2580.SearchEngine.Options;
  * @author fdiaz
  */
 class QueryHandler implements HttpHandler {
-
   /**
    * CGI arguments provided by the user through the URL. This will determine
    * which Ranker to use and what output format to adopt. For simplicity, all
@@ -31,6 +30,8 @@ class QueryHandler implements HttpHandler {
     public String _query = "";
     // How many results to return
     private int _numResults = 10;
+    //How many terms to use for PseudoRelevance
+    private int _numTerms = 10;
     
     // The type of the ranker we will be using.
     public enum RankerType {
@@ -53,7 +54,7 @@ class QueryHandler implements HttpHandler {
     }
     public OutputFormat _outputFormat = OutputFormat.TEXT;
 
-    public CgiArguments(String uriQuery) {
+    public CgiArguments(String uriQuery, String uriPath) {
       String[] params = uriQuery.split("&");
       for (String param : params) {
         String[] keyval = param.split("=", 2);
@@ -64,7 +65,7 @@ class QueryHandler implements HttpHandler {
         String val = keyval[1];
         if (key.equals("query")) {
           _query = val;
-        } else if (key.equals("num")) {
+        } else if (key.equals("num") || key.equals("numDocs")) {
           try {
             _numResults = Integer.parseInt(val);
           } catch (NumberFormatException e) {
@@ -81,6 +82,12 @@ class QueryHandler implements HttpHandler {
             _outputFormat = OutputFormat.valueOf(val.toUpperCase());
           } catch (IllegalArgumentException e) {
             // Ignored, search engine should never fail upon invalid user input.
+          }
+        } else if ( key.equals("numTerms")){
+          try {
+            _numTerms = Integer.parseInt(val);
+          } catch (NumberFormatException e){
+
           }
         }
       }  // End of iterating over params
@@ -132,16 +139,21 @@ class QueryHandler implements HttpHandler {
     // Validate the incoming request.
     String uriQuery = exchange.getRequestURI().getQuery();
     String uriPath = exchange.getRequestURI().getPath();
+
+    CgiArguments cgiArgs = null;
     if (uriPath == null || uriQuery == null) {
       respondWithMsg(exchange, "Something wrong with the URI!");
-    }
-    if (!uriPath.equals("/search")) {
-      respondWithMsg(exchange, "Only /search is handled!");
+    } else if(uriPath.toLowerCase().equals("/search")) {
+      cgiArgs = new CgiArguments(uriQuery,uriPath);
+    } else if(uriPath.toLowerCase().equals("/prf")){
+      cgiArgs = new CgiArguments(uriQuery,uriPath);
+    } else {
+      respondWithMsg(exchange, "Only /search and /prf are handled!");
     }
     System.out.println("Query: " + uriQuery);
 
     // Process the CGI arguments.
-    CgiArguments cgiArgs = new CgiArguments(uriQuery);
+
     if (cgiArgs._query.isEmpty()) {
       respondWithMsg(exchange, "No query is given!");
     }
@@ -167,6 +179,9 @@ class QueryHandler implements HttpHandler {
       scoredDocs =
               ranker.runQuery(processedQuery, cgiArgs._numResults);
     }
+
+    PseudoRelevance pseudoRelevance = new PseudoRelevance( SearchEngine.OPTIONS, _indexer);
+    pseudoRelevance.queryRepresentation(scoredDocs, cgiArgs._numTerms);
 
     StringBuffer response = new StringBuffer();
     switch (cgiArgs._outputFormat) {

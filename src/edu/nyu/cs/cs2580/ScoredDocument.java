@@ -7,7 +7,7 @@ package edu.nyu.cs.cs2580;
  * @author congyu
  */
 class ScoredDocument implements Comparable<ScoredDocument> {
-  private Document _doc;
+  public Document _doc;
   private double _score;
 
   public ScoredDocument(Document doc, double score) {

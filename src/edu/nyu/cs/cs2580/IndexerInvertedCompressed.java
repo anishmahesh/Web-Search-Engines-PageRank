@@ -21,7 +21,7 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
   // Maps each term to their integer representation
   private Map<String, Integer> _dictionary = new HashMap<String, Integer>();
   // All unique terms appeared in corpus. Offsets are integer representations.
-  private Vector<String> _terms = new Vector<String>();
+  public Vector<String> _terms = new Vector<String>();
 
   // Stores all Document in memory.
   private Vector<Document> _documents = new Vector<Document>();

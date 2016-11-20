@@ -10,6 +10,7 @@ import java.util.*;
  */
 public class PseudoRelevance {
     private Options _options = null;
+    private Indexer _indexer = null;
 
     //for each term in al documents bein considered, contains the sum of frequency of the term in all those documents
     private HashMap<String, Integer> _term = new HashMap<>();
@@ -19,8 +20,9 @@ public class PseudoRelevance {
 
 
 
-    public PseudoRelevance(Options options) {
+    public PseudoRelevance(Options options, Indexer indexer) {
         _options = options;
+        _indexer = indexer;
     }
 
     public void queryRepresentation(Vector<ScoredDocument> Results, int numTerms) throws IOException {
@@ -55,58 +57,31 @@ public class PseudoRelevance {
     }
 
     public void loadDataToPostingListForDoc(Document doc) throws IOException {
+        String fileName = _options._indexPrefix + "/Documents/" + doc._docid;
+        File docFile = new File(fileName);
+        if(docFile.exists()) {
+            byte[] bytes = Files.readAllBytes(new File(fileName).toPath());
+            Vector<Byte> vb = new Vector<>();
+            for (byte b : bytes) {
+                vb.add(b);
+            }
 
-        File docFolder = new File(_options._indexPrefix + "/Documents");
-        File[] docFiles = docFolder.listFiles();
-        Indexer indexer = null;
-        int documentDataFileNumber = (doc._docid / Integer.parseInt(indexer._options._DOCS_PER_DOCFILE));
-
-        if (documentDataFileNumber < docFiles.length) {
-            String fileName = _options._indexPrefix + "/Documents/doc-" + documentDataFileNumber + ".tsv";
-                BufferedReader reader = new BufferedReader(new FileReader(fileName));
-                byte[] bytes = Files.readAllBytes(new File(fileName).toPath());
-
-
-                Vector<Byte> vb = new Vector<>();
-                for (byte b : bytes) {
-                    vb.add(b);
+            Vector<Integer> numbers = IndexCompressor.vByteDecoder(vb);
+            int i = 0;
+            int lastTerm = 0;
+            int docId = numbers.get(i++);
+            while (i < numbers.size()) {
+                int num = numbers.get(i) + lastTerm;
+                String mapKey = ((IndexerInvertedCompressed)_indexer)._terms.get(num);
+                if (_term.containsKey(mapKey)) {
+                    _term.put(mapKey, _term.get(mapKey) + numbers.get(i + 1));
+                } else {
+                    _term.put(mapKey, numbers.get(i + 1));
                 }
-
-                Vector<Integer> numbers = IndexCompressor.vByteDecoder(vb);
-
-
-                int i = 0;
-
-                while (i < numbers.size()) {
-                    int docId = numbers.get(i);
-                    int postingSize = numbers.get(i + 1);
-                    if (docId == doc._docid) {
-                        int j;
-                        for (j = i + 2; j < i + 2 + postingSize; j++) {
-                            String mapKey = indexer._reverseDictionary.get(numbers.get(j));
-                            if(_term.containsKey(mapKey)){
-                                _term.put(mapKey, _term.get(mapKey) + numbers.get(j+1));
-                            } else {
-                                _term.put(mapKey, numbers.get(j + 1));
-                            }
-                        }
-                        i=j;
-                    } else {
-                        i = i + 2 + postingSize;
-                    }
-                }
+                lastTerm = num;
+                i += 2;
             }
         }
-
-    private ArrayList<String> getAllQueries() throws IOException {
-        BufferedReader br =  new BufferedReader(new FileReader(_options._indexPrefix+"/queries.tsv"));
-        String line;
-        ArrayList<String> fileQueries = new ArrayList<String>();
-        while((line = br.readLine()) != null){
-            fileQueries.add(line);
-        }
-        br.close();
-        return fileQueries;
     }
 
     class TermObject implements Comparable<TermObject>{
