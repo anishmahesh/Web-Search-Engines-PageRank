@@ -18,7 +18,7 @@ public class Bhattacharyya {
     }
 
     public static void main(String[] args) throws IOException {
-        Bhattacharyya bc = new Bhattacharyya(new Options("../conf/engine.conf"));
+        Bhattacharyya bc = new Bhattacharyya(new Options("conf/engine.conf"));
         String pathPrfOutput, pathOutputFile;
 
         if(args[1].contains(".tsv")){
@@ -44,19 +44,21 @@ public class Bhattacharyya {
         BufferedReader reader = new BufferedReader(new FileReader(tsvFile));
         FileWriter outputFile = new FileWriter(pathOutputFile);
         BufferedWriter output = new BufferedWriter(outputFile);
-        ArrayList<String> queriesList = getAllQueries();
+        ArrayList<String> queriesList = new ArrayList<>();
         HashMap<String, String > queryToFileName = new HashMap<>();
         String fileLine;
 
         while ((fileLine = reader.readLine()) != null){
             Scanner s = new Scanner(fileLine);
-            queryToFileName.put(s.next().toString(), s.next().toString());
+            String sNext[] = s.next().split(":");
+            String query = sNext[0];
+            queriesList.add(query);
+            queryToFileName.put(query, sNext[1]);
         }
 
         for(int i=0; i <= queriesList.size(); i++){
             double beta = 0.0;
-            String tsvFileData = queryToFileName.get(queriesList.get(i));
-            String fileName = tsvFileData.split(":")[1];
+            String fileName = queryToFileName.get(queriesList.get(i));
             File file1 = new File(fileName);
             if(!file1.exists()){
                 break;
@@ -67,13 +69,13 @@ public class Bhattacharyya {
             HashMap<String, Double> queryProbabilityMap = new HashMap<String, Double>();
             while ((line = reader1.readLine()) != null) {
                 Scanner s = new Scanner(line);
-                queryProbabilityMap.put(s.next().toString(), Double.parseDouble(s.next()));
+                queryProbabilityMap.put(s.next(), Double.parseDouble(s.next()));
             }
             reader1.close();
 
-            for (int j=i; j <= queriesList.size(); j++){
-                String tsvFileData2 = queryToFileName.get(queriesList.get(j));
-                String fileName2 = tsvFileData.split(":")[1];
+            for (int j=0; j <= queriesList.size(); j++){
+                if(i==j) continue;
+                String fileName2 = queryToFileName.get(queriesList.get(j));
                 File file2 = new File(fileName2);
                 if (!file2.exists()) {
                     break;
@@ -83,7 +85,7 @@ public class Bhattacharyya {
                 double probability = 0.0;
                 while ((line = reader2.readLine()) != null) {
                     Scanner s = new Scanner(line);
-                    queryTerm = s.next().toString();
+                    queryTerm = s.next();
                     probability = Double.parseDouble(s.next());
                     if (queryProbabilityMap.containsKey(queryTerm)) {
                         beta += Math.sqrt(queryProbabilityMap.get(queryTerm) * probability);
@@ -122,6 +124,7 @@ public class Bhattacharyya {
 
             for (int j = i; j <= fileList.length; j++) {
 
+                if(i==j) continue;
                 File file2 = new File(pathPrfOutput + "/prf-" + j + ".tsv");
                 if (!file2.exists()) {
                     break;
