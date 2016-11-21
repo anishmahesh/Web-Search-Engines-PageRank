@@ -20,7 +20,7 @@ public class Spearman {
 
     public static void main (String[] args) throws IOException, ClassNotFoundException {
         Spearman sp = new Spearman(new Options("conf/engine.conf"));
-        if(args.length <= 0) {
+        if(args.length > 0) {
             sp.loadData(args[0], args[1]);
         } else {
             sp.loadData("", "");

@@ -25,9 +25,15 @@ public class Query {
     if (_query == null) {
       return;
     }
+    _query = _query.toLowerCase();
+    _query = TextProcessor.regexRemoval(_query);
     Scanner s = new Scanner(_query);
+    Stemmer stemmer = new Stemmer();
     while (s.hasNext()) {
-      _tokens.add(s.next());
+      String term = s.next();
+      stemmer.add(term.toCharArray(), term.length());
+      stemmer.stem();
+      _tokens.add(stemmer.toString());
     }
     s.close();
   }
