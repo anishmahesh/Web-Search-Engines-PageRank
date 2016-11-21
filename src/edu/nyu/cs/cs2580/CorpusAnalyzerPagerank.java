@@ -1,10 +1,7 @@
 package edu.nyu.cs.cs2580;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 import edu.nyu.cs.cs2580.SearchEngine.Options;
 
@@ -14,13 +11,14 @@ import edu.nyu.cs.cs2580.SearchEngine.Options;
 public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
 
   private final int _iterCount =2;
-  private final float _lambda = 0.8f;
+  private final float _lambda = 0.1f;
   private final String _outFilePath = _options._indexPrefix + "/PageRank.tsv";
 
   private Vector<Float> _ranks = new Vector<>();
   private Map<String, Integer> _docNameIDMap = new HashMap<String, Integer>();
-  private Vector<Vector<Integer>> _docLinks = new Vector<Vector<Integer>>();
+  private Vector<HashSet<Integer>> _docLinks = new Vector<HashSet<Integer>>();
   private Vector<Integer> _docOutgoingLinkCount = new Vector<Integer>();
+  private Vector<Integer> _docIncomingLinkCount = new Vector<Integer>();
 
 
   public CorpusAnalyzerPagerank(Options options) {
@@ -75,41 +73,60 @@ public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
     Vector<Float> _V = new Vector<> ();
     int totalDocs = _docNameIDMap.size();
 
-    //Initializing all the page ranks with score 1.0/|P|
-    //as per the random surfer model for _iterCount 0
     for(int i = 0; i < totalDocs; i++) {
-      _V.add(1.0f/totalDocs);
+      _V.add(1.0f);
     }
 
     for(int i = 0; i< _iterCount; i++) {
 
       //Google matrix's component for dangling link
-      for (int j = 0; j < totalDocs; j++) {
-        _ranks.add(_lambda/totalDocs);
+      Float val1 = 0.0f;
+      for(int d=0;d<totalDocs;d++){
+        val1 = ((1.0f - _lambda)/totalDocs)*_V.get(d);
       }
+      _ranks = new Vector<>();
 
+      for (int j = 0; j < totalDocs; j++) {
+        _ranks.add(val1);
+      }
 
       for (Map.Entry<String, Integer> entry : _docNameIDMap.entrySet()) {
 
-        Vector<Integer> outLinks = _docLinks.get(entry.getValue());
+        HashSet<Integer> outLinks = _docLinks.get(entry.getValue());
+        int docId = _docNameIDMap.get(entry.getKey());
 
         //If there are outlinks miltiply and add value with corresponding _Vector
-        if(outLinks.size() > 0) {
-          for(int d = 0; d < outLinks.size(); d++) {
-            int docId = outLinks.get(d);
+        /*if(outLinks.size() > 0) {
+          for(int docId : outLinks) {
+            System.out.println(docId);
+            //int docId = outLinks.get(d);
             Float val = _ranks.get(docId);
-            val += (1.0f - _lambda) * _V.get(entry.getValue())/outLinks.size();
+            int linksCount = _docOutgoingLinkCount.get(docId);
+            val += (_lambda)*(_V.get(docId)/linksCount);
+            System.out.println(_V.get(entry.getValue()));
             _ranks.set(docId, val);
           }
-        } else {
-          for(int d = 0; d < totalDocs; d++) {
-            Float val = _ranks.get(d);
-            val += (1.0f - _lambda) * _V.get(entry.getValue())/totalDocs;
-            _ranks.set(d, val);
-          }
         }
-        _V = _ranks;
+        */
+
+        //GoogleMatrix Transpose Matrix Rank Calculation
+        float outLinkRankVal = 0.0f;
+        if (outLinks.size() > 0) {
+          for (int currDocId = 0; currDocId < totalDocs; currDocId++) {
+            if (_docLinks.get(currDocId).contains(docId)) {
+              int linksCount = _docOutgoingLinkCount.get(currDocId);
+              //int linksCount = _docLinks.get(currDocId).size();
+              if(linksCount!=0){
+                outLinkRankVal += (_lambda) * (1.0f / linksCount) * _V.get(currDocId);
+              }
+            }
+          }
+          Float val = _ranks.get(docId);
+          val += outLinkRankVal;
+          _ranks.set(docId, val);
+        }
       }
+      _V = _ranks;
     }
     savePageRanks();
   }
@@ -169,8 +186,9 @@ public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
       if(file.isFile() && !file.isHidden()) {
         _docNameIDMap.put(file.getName(),count);
         _docOutgoingLinkCount.add(count,0);
-        _docLinks.add(new Vector<Integer>());
-        extractLinks(file);
+        _docIncomingLinkCount.add(count,0);
+        _docLinks.add(new HashSet<>());
+        //extractLinks(file);
         count++;
       }else if(file.isDirectory()){
         //not recursively going inside a directory
@@ -178,6 +196,11 @@ public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
         //processFiles(dir+file.getName());
       }
     }
+    for (File file : fileNames) {
+      extractLinks(file);
+    }
+
+    System.out.println("DocSize ::::::: "+_docLinks.size());
   }
 
   public void extractLinks(File file) throws IOException {
@@ -192,7 +215,9 @@ public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
         int destDocId = _docNameIDMap.get(next_link);
         //New Link(of a doc in the corpus - Increment the link count
         if (!_docLinks.get(sourceDocId).contains(destDocId)&&destDocId!=sourceDocId) {
+          _docLinks.get(sourceDocId).add(destDocId);
           _docOutgoingLinkCount.set(sourceDocId, _docOutgoingLinkCount.get(sourceDocId) + 1);
+          _docIncomingLinkCount.set(destDocId,_docIncomingLinkCount.get(destDocId)+1);
         }
 
       }
@@ -204,5 +229,6 @@ public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
     CorpusAnalyzerPagerank corp = new CorpusAnalyzerPagerank(new Options("conf/engine.conf"));
     corp.prepare();
     corp.compute();
+
   }
 }
