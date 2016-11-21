@@ -144,7 +144,7 @@ public class Bhattacharyya {
     }
 
     private ArrayList<String> getAllQueries() throws IOException {
-        BufferedReader br =  new BufferedReader(new FileReader(_options._indexPrefix+"/queries.tsv"));
+        BufferedReader br =  new BufferedReader(new FileReader(_options._dataPrefix +"/queries.tsv"));
         String line;
         ArrayList<String> queryList = new ArrayList<String>();
         while((line = br.readLine()) != null){
