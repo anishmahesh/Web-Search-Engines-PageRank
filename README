@@ -34,6 +34,38 @@ From the root directory
 	java -cp "lib/jsoup-1.10.1.jar:src" -Xmx512m edu.nyu.cs.cs2580.SearchEngine --mode=serve --options=conf/engine.conf --port=25808
 
 
+
+------------------------------------------------------------
+	    	Running Pseudo Relavance
+------------------------------------------------------------		
+	1. Run Command : 	
+		curl "http://localhost:25808/prf?query=$q&ranker=favorite&numdocs=10&numterms=5"
+	***NOTE:
+	i.   Run above command at time of serving to get spearman generated for any query. 
+	ii.  The result is displayed to the client. 
+	iii. Default value for numdocs = 10 and numterms = 10.
+
+
+
+------------------------------------------------------------
+	    	Running Spearman
+------------------------------------------------------------
+
+	1. Run Command : 	
+		java -cp src edu.nyu.cs.cs2580.Spearman <PATH-TO-PAGERANKS> <PATH-TO-NUMVIEWS>
+	
+		For our code :
+				<PATH-TO-PAGERANKS> = data/index/PageRank.tsv 
+				<PATH-TO-NUMVIEWS> = data/index/numViews.tsv
+			
+	***NOTE:
+
+	i.   Needs to be run from root directory. 
+	ii.  If giving the path, give the exact path of both files with file name.
+	iii. Run the above after serving if you don't want to give path to page rank and num view, 
+	     load method from page rank and num views classes are used for getting data.
+
+
 ------------------------------------------------------------
 	    	Running Bhattacharya
 ------------------------------------------------------------
@@ -43,10 +75,10 @@ From the root directory
 
 ***NOTE:
 	It is assumed the above command will be run from the root directory. 
-	i. It should have a "query:File-Name" structure.
-	ii. Query shouldn't have  space but %20 for space.
+	i.   It should have a "query:File-Name" structure.
+	ii.  Query shouldn't have  space but %20 for space.
 	iii. The file should be at the same directory level as Root Folder.
-	iv. qsim file is at the same directory level as Root Folder.
+	iv.  qsim file is at the same directory level as Root Folder.
 
 
 
@@ -55,10 +87,25 @@ From the root directory
 
 ***NOTE:
 	It is assumed the above command will be run from the root directory. 
-	i. There should be a list of queries file called queries.tsv, stored at Data.
-	ii. Query shouldn't have  space but %20 for space.
+	i.   There should be a list of queries file called queries.tsv, stored at Data.
+	ii.  Query shouldn't have  space but %20 for space.
 	iii. qsim file is at the same level as Root Directory. 
 
+
+3.Running Through Script
+
+	Script:
+	#!/bin/bash
+
+	rm -f prf*.tsv
+	i=0
+	while read q ; do
+		i=$((i + 1));
+		prfout=prf-$i.tsv;
+		curl "http://localhost:25808/prf?query=$q&ranker=favorite&numdocs=10&numterms=5" > $prfout;
+		echo $q:$prfout >> prf.tsv
+	done < queries.tsv
+	java -cp src edu.nyu.cs.cs2580.Bhattacharyya prf.tsv qsim.tsv
 
 ------------------------------------------------------------
 	    		Indexing
@@ -89,7 +136,9 @@ From the root directory
 		V = (No of Docs)x1, Matrix with each value = 1
 	- To save n^3 computations instead of calculating G^n first we first calculate G*V to generate 
 	  a 1*(No Of Docs) Matrix . We then multiply this Matrix with G matrix each time for further 		  iterations.
-	- We have also optimised the matrix multiplication by storing matrix in terms of adjacency list 	  in terms of Vectors. So that we only give 
-
-
-	- We have
+	- We have also optimised the matrix multiplication by storing matrix in terms of adjacency list 	  (as Vectors). By this way, we will only store the value of docs that has outlines from a 		  particular docs and not all the documents. As the matrix could be sparse, this will optimise 		  memory space used.  
+	- We store the data in data/index/PageRank.tsv
+	- The data is stored in the format: <document name> <PageRank Score>.
+	- During indexing, this data is loaded and every document has its PageRank stored in its object.
+	- This intrinsic property is then used during ranking with Ranker Comprehensive.
+	***NOTE : In case you’re providing you own PageRanks file for spearman , please ensure it is tab delimited.
