@@ -18,6 +18,9 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
   private int indexCount = 0;
   private int partCount = 0;
 
+  public int maxNumViews = 0;
+  public float maxPageRank = 0.0f;
+
   // Maps each term to their integer representation
   private Map<String, Integer> _dictionary = new HashMap<String, Integer>();
   // All unique terms appeared in corpus. Offsets are integer representations.
@@ -263,8 +266,12 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
 
           doc.setTitle(htmlDocument.getTitle());
           doc.setUrl(htmlDocument.getUrl());
-          doc.setNumViews(numViews.get(file.getName()).intValue());
-          doc.setPageRank(pageRanks.get(file.getName()).floatValue());
+          int currNumViews = numViews.get(file.getName()).intValue();
+          maxNumViews = currNumViews > maxNumViews ? currNumViews : maxNumViews;
+          doc.setNumViews(currNumViews);
+          float currPageRank = pageRanks.get(file.getName()).floatValue();
+          maxPageRank = currPageRank > maxPageRank ? currPageRank : maxPageRank;
+          doc.setPageRank(currPageRank);
           _documents.add(doc);
           ++_numDocs;
 
@@ -286,6 +293,11 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
 
       }
     }
+
+    String maxVal = _options._corpusPrefix + "maxVals.txt";
+    BufferedWriter writer = new BufferedWriter(new FileWriter(maxVal, true));
+    writer.write(maxNumViews + "\n" + maxPageRank);
+    writer.close();
 
     indexCount++;
     System.out.println("Constructing partial index number: " + indexCount);
