@@ -21,11 +21,7 @@ public class Bhattacharyya {
         Bhattacharyya bc = new Bhattacharyya(new Options("conf/engine.conf"));
         String pathPrfOutput, pathOutputFile;
 
-        if(args[1].contains(".tsv")){
-            pathOutputFile = _options._indexPrefix + "/Bhattacharya/" + args[1];
-        } else {
-            pathOutputFile = args[1];
-        }
+        pathOutputFile = args[1];
 
         if(args[0].contains(".tsv")){
             String tsvFileName = args[0];
@@ -49,14 +45,13 @@ public class Bhattacharyya {
         String fileLine;
 
         while ((fileLine = reader.readLine()) != null){
-            Scanner s = new Scanner(fileLine);
-            String sNext[] = s.next().split(":");
+            String sNext[] = fileLine.split(":");
             String query = sNext[0];
             queriesList.add(query);
             queryToFileName.put(query, sNext[1]);
         }
 
-        for(int i=0; i <= queriesList.size(); i++){
+        for(int i=0; i < queriesList.size(); i++){
             double beta = 0.0;
             String fileName = queryToFileName.get(queriesList.get(i));
             File file1 = new File(fileName);
@@ -73,7 +68,7 @@ public class Bhattacharyya {
             }
             reader1.close();
 
-            for (int j=0; j <= queriesList.size(); j++){
+            for (int j=0; j < queriesList.size(); j++){
                 if(i==j) continue;
                 String fileName2 = queryToFileName.get(queriesList.get(j));
                 File file2 = new File(fileName2);
@@ -122,7 +117,7 @@ public class Bhattacharyya {
             }
             reader1.close();
 
-            for (int j = i; j <= fileList.length; j++) {
+            for (int j = 1; j <= fileList.length; j++) {
 
                 if(i==j) continue;
                 File file2 = new File(pathPrfOutput + "/prf-" + j + ".tsv");

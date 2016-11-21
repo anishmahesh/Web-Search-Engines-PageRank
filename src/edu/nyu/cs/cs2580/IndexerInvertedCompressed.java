@@ -100,16 +100,11 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
 
     Vector<Integer> terms = new Vector<>();
 
-    int lastTerm = 0;
-    int num;
     int i = 0;
     while (i < termIds.size()){
       int offset = termIds.get(i);
 
-      num = offset - lastTerm;
-      lastTerm = offset;
-
-      terms.add(num);
+      terms.add(offset);
       terms.add(termIds.get(i+1));
 
       i += 2;
