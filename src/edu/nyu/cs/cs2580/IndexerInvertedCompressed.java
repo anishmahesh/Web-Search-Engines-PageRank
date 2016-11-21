@@ -340,6 +340,10 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
     File index = new File(indexFile);
     File first = new File(firstFile);
 
+    if (indexCount == 1) {
+      first.renameTo(index);
+    }
+
     for (int i = 2; i <= indexCount; i++) {
       String secondFile = _options._indexPrefix + "/tempIndex" + i + ".tsv";
 
