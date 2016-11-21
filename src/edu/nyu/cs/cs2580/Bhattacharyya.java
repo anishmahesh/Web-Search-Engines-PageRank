@@ -45,8 +45,7 @@ public class Bhattacharyya {
         String fileLine;
 
         while ((fileLine = reader.readLine()) != null){
-            Scanner s = new Scanner(fileLine);
-            String sNext[] = s.next().split(":");
+            String sNext[] = fileLine.split(":");
             String query = sNext[0];
             queriesList.add(query);
             queryToFileName.put(query, sNext[1]);
