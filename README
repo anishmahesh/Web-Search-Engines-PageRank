@@ -1,0 +1,27 @@
+******** Commands to run the search engine ***********
+
+From the root directory
+
+javac -cp "lib/jsoup-1.10.1.jar:src" src/edu/nyu/cs/cs2580/*.java
+
+java -cp "lib/jsoup-1.10.1.jar:src" edu.nyu.cs.cs2580.SearchEngine --mode=mining --options=conf/engine.conf
+
+java -cp "lib/jsoup-1.10.1.jar:src" edu.nyu.cs.cs2580.SearchEngine --mode=index --options=conf/engine.conf
+
+java -cp "lib/jsoup-1.10.1.jar:src" -Xmx512m edu.nyu.cs.cs2580.SearchEngine --mode=serve --options=conf/engine.conf --port=25808
+
+
+******** Indexing **********
+
+We use "only" IndexerInvertedCompressed for this Homework. We assume the graders will run the code with just
+this indexer.
+
+
+******** Num Views *********
+
+For NumViews, we compute the num views for each document in our corpus during the mining mode.
+We store the data in data/index/numViews.tsv
+The data is stored in the format: <document name> <numViews>.
+
+During indexing, this data is loaded and every document has its numViews stored in its object.
+This intrinsic property is then used during ranking with Ranker Comprehensive.
