@@ -70,6 +70,8 @@ From the root directory
 	    	Running Bhattacharya
 ------------------------------------------------------------
 
+***NOTE : We are assuming the set V is set of all frequently used terms in document from both queries, hence the result would be same for irrespective of the order of the queries.
+
 1. If given a prf.tsv file, execute the following command:  
 	java -cp src edu.nyu.cs.cs2580.Bhattacharyya prf.tsv qsim.tsv
 
