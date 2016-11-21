@@ -8,12 +8,17 @@ public class TextProcessor {
             "(\\[[0-9]*\\])",
             "(\\[edit\\])" ,
             "\\p{Punct}",
-            "[\\s]((the)|(or)|(and)|(be)|(of)|(for)|(to)|(is)|(was)|(it)|(has)|(had)|(etc)|(shall)|(a)|(but)|(him)|(his)|(if)|(an)|(in))[\\s]",
             "[\\s][^\\s][\\s]"};
+
+    private static final String[] stopWords = {"the","or","and","be","of","for","to","is","was","it","has","had","etc","shall","a","but","him","his","if","an","in"};
 
     public static String regexRemoval(String _text){
         for(String regex : removalRegex){
             _text = _text.replaceAll(regex," ");
+        }
+
+        for(String stopWord : stopWords){
+            _text = _text.replaceAll("[\\s]" + stopWord + "[\\s]", " ");
         }
         return _text;
     }
