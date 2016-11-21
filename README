@@ -131,6 +131,7 @@ From the root directory
 	***NOTE : In case you’re providing you own NumViews file for spearman , please ensure it is tab delimited.
 
 2. Page Rank
+	- We have chosen a value of λ = 0.9 because since our corpus is not a representation of internet which can have many dangling links for a random surfer. We know that the all documents having outlines to each other will be present locally in  our corpus. Hence , a higher lambda value would more accurately represent the page ranks.(Having a higher component of transition matrix in ranks). 
 	- For Page Rank we have used the formula G^n*V , where G is the Google matrix 
 		where,
 		G = λ(Transition Matrix) + (1 - λ) * (Dangling Link Matrix)

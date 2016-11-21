@@ -11,7 +11,7 @@ import edu.nyu.cs.cs2580.SearchEngine.Options;
 public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
 
   private final int _iterCount =2;
-  private final float _lambda = 0.1f;
+  private final float _lambda = 0.9f;
   private final String _outFilePath = _options._indexPrefix + "/PageRank.tsv";
 
   private Vector<Float> _ranks = new Vector<>();
