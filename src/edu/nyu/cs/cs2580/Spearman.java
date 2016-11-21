@@ -19,7 +19,7 @@ public class Spearman {
     }
 
     public static void main (String[] args) throws IOException, ClassNotFoundException {
-        Spearman sp = new Spearman(new Options("conf/engine.conf"));
+        Spearman sp = new Spearman(new Options("../conf/engine.conf"));
         sp.loadData(args[0], args[1]);
         System.out.println(sp.computeSpearman());
     }
