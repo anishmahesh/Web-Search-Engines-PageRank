@@ -18,33 +18,90 @@ public class Bhattacharyya {
     }
 
     public static void main(String[] args) throws IOException {
-        Bhattacharyya bc = new Bhattacharyya(new Options("conf/engine.conf"));
+        Bhattacharyya bc = new Bhattacharyya(new Options("../conf/engine.conf"));
         String pathPrfOutput, pathOutputFile;
-        if(args[0].contains(".tsv")){
-            //Split content of TSV file and return the path where split content is found
-            pathPrfOutput = splitInMultipleFiles(args[0]);
-        } else {
-            pathPrfOutput = args[0];
-        }
+
         if(args[1].contains(".tsv")){
             pathOutputFile = _options._indexPrefix + "/Bhattacharya/" + args[1];
         } else {
             pathOutputFile = args[1];
         }
-        bc.querySimilarity(pathPrfOutput, pathOutputFile);
+
+        if(args[0].contains(".tsv")){
+            String tsvFileName = args[0];
+            File tsvFile = new File(tsvFileName);
+            if(!tsvFile.exists()){
+                throw (new IOException( tsvFileName + " file not found!!"));
+            }
+            bc.querySimilarity(tsvFile, pathOutputFile);
+        } else {
+            pathPrfOutput = args[0];
+            bc.querySimilarity(pathPrfOutput, pathOutputFile);
+        }
     }
 
-    private static String splitInMultipleFiles(String tsvFileName) {
+    private void querySimilarity(File tsvFile, String pathOutputFile) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(tsvFile));
+        FileWriter outputFile = new FileWriter(pathOutputFile);
+        BufferedWriter output = new BufferedWriter(outputFile);
+        ArrayList<String> queriesList = getAllQueries();
+        HashMap<String, String > queryToFileName = new HashMap<>();
+        String fileLine;
 
-        return new String();
+        while ((fileLine = reader.readLine()) != null){
+            Scanner s = new Scanner(fileLine);
+            queryToFileName.put(s.next().toString(), s.next().toString());
+        }
+
+        for(int i=0; i <= queriesList.size(); i++){
+            double beta = 0.0;
+            String tsvFileData = queryToFileName.get(queriesList.get(i));
+            String fileName = tsvFileData.split(":")[1];
+            File file1 = new File(fileName);
+            if(!file1.exists()){
+                break;
+            }
+
+            BufferedReader reader1 = new BufferedReader(new FileReader(file1));
+            String line;
+            HashMap<String, Double> queryProbabilityMap = new HashMap<String, Double>();
+            while ((line = reader1.readLine()) != null) {
+                Scanner s = new Scanner(line);
+                queryProbabilityMap.put(s.next().toString(), Double.parseDouble(s.next()));
+            }
+            reader1.close();
+
+            for (int j=i; j <= queriesList.size(); j++){
+                String tsvFileData2 = queryToFileName.get(queriesList.get(j));
+                String fileName2 = tsvFileData.split(":")[1];
+                File file2 = new File(fileName2);
+                if (!file2.exists()) {
+                    break;
+                }
+                BufferedReader reader2 = new BufferedReader(new FileReader(file2));
+                String queryTerm;
+                double probability = 0.0;
+                while ((line = reader2.readLine()) != null) {
+                    Scanner s = new Scanner(line);
+                    queryTerm = s.next().toString();
+                    probability = Double.parseDouble(s.next());
+                    if (queryProbabilityMap.containsKey(queryTerm)) {
+                        beta += Math.sqrt(queryProbabilityMap.get(queryTerm) * probability);
+                    }
+                }
+                reader2.close();
+                output.write(queriesList.get(i) + "\t" + queriesList.get(j) + "\t" + Double.toString(beta) + "\n");
+            }
+        }
+        output.close();
     }
 
     public void querySimilarity(String pathPrfOutput, String pathOutputFile) throws IOException {
         File queryFolder = new File(pathPrfOutput);
         File[] fileList = queryFolder.listFiles();
-        ArrayList<String> queriesList = getAllQueries();
         FileWriter outputFile = new FileWriter(pathOutputFile);
         BufferedWriter output = new BufferedWriter(outputFile);
+        ArrayList<String> queriesList = getAllQueries();
 
         for (int i = 1; i <= fileList.length; i++) {
             double beta = 0.0;
@@ -53,33 +110,36 @@ public class Bhattacharyya {
             if(!file1.exists()){
                 break;
             }
-            BufferedReader reader1 = new BufferedReader(new FileReader(file1));
-            for (int j = i; j <= fileList.length; j++) {
-                    File file2 = new File(pathPrfOutput + "/prf-" + j + ".tsv");
-                    if (!file2.exists()) {
-                        break;
-                    }
-                    BufferedReader reader2 = new BufferedReader(new FileReader(file2));
 
-                    String line = null;
-                    HashMap<String, Double> queryProbabilityMap = new HashMap<String, Double>();
-                    while ((line = reader1.readLine()) != null) {
-                        Scanner s = new Scanner(line);
-                        queryProbabilityMap.put(s.next().toString(), Double.parseDouble(s.next()));
+            BufferedReader reader1 = new BufferedReader(new FileReader(file1));
+            String line;
+            HashMap<String, Double> queryProbabilityMap = new HashMap<String, Double>();
+            while ((line = reader1.readLine()) != null) {
+                Scanner s = new Scanner(line);
+                queryProbabilityMap.put(s.next().toString(), Double.parseDouble(s.next()));
+            }
+            reader1.close();
+
+            for (int j = i; j <= fileList.length; j++) {
+
+                File file2 = new File(pathPrfOutput + "/prf-" + j + ".tsv");
+                if (!file2.exists()) {
+                    break;
+                }
+
+                BufferedReader reader2 = new BufferedReader(new FileReader(file2));
+                String queryTerm = null;
+                double probability = 0.0;
+                while ((line = reader2.readLine()) != null) {
+                    Scanner s = new Scanner(line);
+                    queryTerm = s.next().toString();
+                    probability = Double.parseDouble(s.next());
+                    if (queryProbabilityMap.containsKey(queryTerm)) {
+                        beta += Math.sqrt(queryProbabilityMap.get(queryTerm) * probability);
                     }
-                    reader1.close();
-                    String queryTerm = null;
-                    double probability = 0;
-                    while ((line = reader2.readLine()) != null) {
-                        Scanner s = new Scanner(line);
-                        queryTerm = s.next().toString();
-                        probability = Double.parseDouble(s.next());
-                        if (queryProbabilityMap.containsKey(queryTerm)) {
-                            beta += Math.sqrt(queryProbabilityMap.get(queryTerm) * probability);
-                        }
-                    }
-                    reader2.close();
-                    output.write(queriesList.get(i) + "\t" + queriesList.get(j) + "\t" + Double.toString(beta) + "\n");
+                }
+                reader2.close();
+                output.write(queriesList.get(i) + "\t" + queriesList.get(j) + "\t" + Double.toString(beta) + "\n");
             }
         }
         output.close();
