@@ -19,7 +19,7 @@ public class Spearman {
     }
 
     public static void main (String[] args) throws IOException, ClassNotFoundException {
-        Spearman sp = new Spearman(new Options("../conf/engine.conf"));
+        Spearman sp = new Spearman(new Options("conf/engine.conf"));
         sp.loadData(args[0], args[1]);
         System.out.println(sp.computeSpearman());
     }
@@ -28,8 +28,8 @@ public class Spearman {
 
         Map <String, Integer> pageRank = rank(_pageRankData);
         Map <String, Integer> numViews = rank(_numViewsData);
-        double x_bar = (pageRank.size()+1)/2;//calculateXBar();
-        double y_bar = (numViews.size()+1)/2;//calculateXBar();
+        double x_bar = (pageRank.size()+1)/2.0;//calculateXBar();
+        double y_bar = (numViews.size()+1)/2.0;//calculateXBar();
 
         double numerator = 0.0;
         double denominatorSummationPageRank = 0.0;
