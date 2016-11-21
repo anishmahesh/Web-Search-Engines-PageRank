@@ -181,23 +181,28 @@ public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
     File[] fileNames = new File(dir).listFiles();
     int count=0;
 
-    for (File file : fileNames) {
+    try {
 
-      if(file.isFile() && !file.isHidden()) {
-        _docNameIDMap.put(file.getName(),count);
-        _docOutgoingLinkCount.add(count,0);
-        _docIncomingLinkCount.add(count,0);
-        _docLinks.add(new HashSet<Integer>());
-        //extractLinks(file);
-        count++;
-      }else if(file.isDirectory()){
-        //not recursively going inside a directory
-        continue;
-        //processFiles(dir+file.getName());
+      for (File file : fileNames) {
+
+        if (file.isFile() && !file.isHidden()) {
+          _docNameIDMap.put(file.getName(), count);
+          _docOutgoingLinkCount.add(count, 0);
+          _docIncomingLinkCount.add(count, 0);
+          _docLinks.add(new HashSet<Integer>());
+          //extractLinks(file);
+          count++;
+        } else if (file.isDirectory()) {
+          //not recursively going inside a directory
+          continue;
+          //processFiles(dir+file.getName());
+        }
       }
-    }
-    for (File file : fileNames) {
-      extractLinks(file);
+      for (File file : fileNames) {
+        extractLinks(file);
+      }
+    } catch (Exception e) {
+
     }
 
     System.out.println("DocSize ::::::: "+_docLinks.size());
