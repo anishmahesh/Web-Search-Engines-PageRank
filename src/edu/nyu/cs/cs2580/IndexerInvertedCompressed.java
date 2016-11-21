@@ -223,12 +223,14 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
 
   private void deleteExistingFile(String indexDir) {
     for(File file: new File(indexDir).listFiles()) {
-      if (file.isDirectory()) {
-        for (File subFile : file.listFiles()) {
-          subFile.delete();
+      if(!file.getName().toLowerCase().contains("numviews.tsv")&&!file.getName().toLowerCase().contains("pagerank.tsv")){
+        if (file.isDirectory()) {
+          for (File subFile : file.listFiles()) {
+            subFile.delete();
+          }
         }
+        file.delete();
       }
-      file.delete();
     }
   }
 
@@ -246,7 +248,7 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
     }
 
     Map<String, Double> numViews = (Map<String, Double>) _logMiner.load();
-
+    Map<String,Float> pageRanks = (Map<String, Float>) _corpusAnalyzer.load();
     int fileNum = 0;
 
     for (File file : fileNames) {
@@ -262,6 +264,7 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
           doc.setTitle(htmlDocument.getTitle());
           doc.setUrl(htmlDocument.getUrl());
           doc.setNumViews(numViews.get(file.getName()).intValue());
+          doc.setPageRank(pageRanks.get(file.getName()));
           _documents.add(doc);
           ++_numDocs;
 
