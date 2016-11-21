@@ -237,7 +237,18 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
     File[] fileNames = new File(dir).listFiles();
     System.out.println("Construct index from: " + dir);
     HTMLParse htmlParse = new HTMLParse();
+
+    String docsDir = _options._indexPrefix + "/Documents";
+    File directory = new File(docsDir);
+
+    if (!directory.exists()) {
+      directory.mkdir();
+    }
+
+    Map<String, Double> numViews = (Map<String, Double>) _logMiner.load();
+
     int fileNum = 0;
+
     for (File file : fileNames) {
 
       try {
@@ -246,17 +257,11 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
           HTMLDocument htmlDocument = htmlParse.getDocument(file);
           DocumentIndexed doc = new DocumentIndexed(_documents.size());
 
-          String docsDir = _options._indexPrefix + "/Documents";
-          File directory = new File(docsDir);
-
-          if (!directory.exists()) {
-            directory.mkdir();
-          }
-
           processDocument(htmlDocument.getBodyText(), doc);
 
           doc.setTitle(htmlDocument.getTitle());
           doc.setUrl(htmlDocument.getUrl());
+          doc.setNumViews(numViews.get(file.getName()).intValue());
           _documents.add(doc);
           ++_numDocs;
 
