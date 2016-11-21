@@ -248,7 +248,7 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
     }
 
     Map<String, Double> numViews = (Map<String, Double>) _logMiner.load();
-    Map<String,Float> pageRanks = (Map<String, Float>) _corpusAnalyzer.load();
+    Map<String, Double> pageRanks = (Map<String, Double>) _corpusAnalyzer.load();
     int fileNum = 0;
 
     for (File file : fileNames) {
@@ -264,7 +264,7 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
           doc.setTitle(htmlDocument.getTitle());
           doc.setUrl(htmlDocument.getUrl());
           doc.setNumViews(numViews.get(file.getName()).intValue());
-          doc.setPageRank(pageRanks.get(file.getName()));
+          doc.setPageRank(pageRanks.get(file.getName()).floatValue());
           _documents.add(doc);
           ++_numDocs;
 
