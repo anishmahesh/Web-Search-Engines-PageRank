@@ -43,8 +43,12 @@ public class PseudoRelevance {
             termProbability.add(tobj);
         }
         Collections.sort(termProbability, Collections.reverseOrder());
+        double totalProbability = 0.0;
         for (int i = 0; i < termProbability.size() && i < numTems; ++i) {
-            System.out.println(termProbability.get(i)._term + " " + termProbability.get(i)._termProbability);
+            totalProbability += termProbability.get(i)._termProbability;
+        }
+        for (int i = 0; i < termProbability.size() && i < numTems; ++i) {
+            System.out.println(termProbability.get(i)._term + " " + (termProbability.get(i)._termProbability)/totalProbability);
         }
     }
 
