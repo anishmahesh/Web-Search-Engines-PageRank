@@ -187,7 +187,7 @@ public class CorpusAnalyzerPagerank extends CorpusAnalyzer {
         _docNameIDMap.put(file.getName(),count);
         _docOutgoingLinkCount.add(count,0);
         _docIncomingLinkCount.add(count,0);
-        _docLinks.add(new HashSet<>());
+        _docLinks.add(new HashSet<Integer>());
         //extractLinks(file);
         count++;
       }else if(file.isDirectory()){
