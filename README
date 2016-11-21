@@ -1,27 +1,95 @@
-******** Commands to run the search engine ***********
+
+######################################
+#
+#	Web Search Engines 
+#	  CSCIGA - 2580
+#	    
+#	    Homework 3
+#	     Group 8
+#
+#       21, November, 2016
+#  @Authors: avm358, sm7029,nk2238
+#####################################
+
+
+------------------------------------------------------------
+	    Commands to run the search engine
+------------------------------------------------------------
 
 From the root directory
 
-javac -cp "lib/jsoup-1.10.1.jar:src" src/edu/nyu/cs/cs2580/*.java
-
-java -cp "lib/jsoup-1.10.1.jar:src" edu.nyu.cs.cs2580.SearchEngine --mode=mining --options=conf/engine.conf
-
-java -cp "lib/jsoup-1.10.1.jar:src" edu.nyu.cs.cs2580.SearchEngine --mode=index --options=conf/engine.conf
-
-java -cp "lib/jsoup-1.10.1.jar:src" -Xmx512m edu.nyu.cs.cs2580.SearchEngine --mode=serve --options=conf/engine.conf --port=25808
+1.Compile Code : 
+	javac -cp "lib/jsoup-1.10.1.jar:src" src/edu/nyu/cs/cs2580/*.java
 
 
-******** Indexing **********
-
-We use "only" IndexerInvertedCompressed for this Homework. We assume the graders will run the code with just
-this indexer.
+2.Generate PageRank ad Numviews
+	java -cp "lib/jsoup-1.10.1.jar:src" edu.nyu.cs.cs2580.SearchEngine --mode=mining --options=conf/engine.conf
 
 
-******** Num Views *********
+3.Index Corpus
+	java -cp "lib/jsoup-1.10.1.jar:src" edu.nyu.cs.cs2580.SearchEngine --mode=index --options=conf/engine.conf
 
-For NumViews, we compute the num views for each document in our corpus during the mining mode.
-We store the data in data/index/numViews.tsv
-The data is stored in the format: <document name> <numViews>.
 
-During indexing, this data is loaded and every document has its numViews stored in its object.
-This intrinsic property is then used during ranking with Ranker Comprehensive.
+4.Run Server
+	java -cp "lib/jsoup-1.10.1.jar:src" -Xmx512m edu.nyu.cs.cs2580.SearchEngine --mode=serve --options=conf/engine.conf --port=25808
+
+
+------------------------------------------------------------
+	    	Running Bhattacharya
+------------------------------------------------------------
+
+1. If given a prf.tsv file, execute the following command:  
+	java -cp src edu.nyu.cs.cs2580.Bhattacharyya prf.tsv qsim.tsv
+
+***NOTE:
+	It is assumed the above command will be run from the root directory. 
+	i. It should have a "query:File-Name" structure.
+	ii. Query shouldn't have  space but %20 for space.
+	iii. The file should be at the same directory level as Root Folder.
+	iv. qsim file is at the same directory level as Root Folder.
+
+
+
+2. If given a folder location for finding all prf files, run the following command :
+	java -cp src edu.nyu.cs.cs2580.Bhattacharyya PrfPath qsim.tsv
+
+***NOTE:
+	It is assumed the above command will be run from the root directory. 
+	i. There should be a list of queries file called queries.tsv, stored at Data.
+	ii. Query shouldn't have  space but %20 for space.
+	iii. qsim file is at the same level as Root Directory. 
+
+
+------------------------------------------------------------
+	    		Indexing
+------------------------------------------------------------
+
+****NOTE ::: As per the instructions in the question, We have "only" used IndexerInvertedCompressed for this Homework. We assume the graders will run the code with just this indexer.
+
+
+--------------------------------------------------------------
+     		Implementation Description
+--------------------------------------------------------------
+
+1. Num Views 
+
+	- For NumViews, we compute the num views for each document in our corpus during the mining mode.
+	- We store the data in data/index/numViews.tsv
+	- The data is stored in the format: <document name> <numViews>.
+
+	- During indexing, this data is loaded and every document has its numViews stored in its object.
+	- This intrinsic property is then used during ranking with Ranker Comprehensive.
+	***NOTE : In case you’re providing you own NumViews file for spearman , please ensure it is tab delimited.
+
+2. Page Rank
+	- For Page Rank we have used the formula G^n*V , where G is the Google matrix 
+		where,
+		G = λ(Transition Matrix) + (1 - λ) * (Dangling Link Matrix)
+		n = no of iterations
+		V = (No of Docs)x1, Matrix with each value = 1
+	- To save n^3 computations instead of calculating G^n first we first calculate G*V to generate 
+	  a 1*(No Of Docs) Matrix . We then multiply this Matrix with G matrix each time for further 		  iterations.
+	- We have also optimised the matrix multiplication by storing matrix in terms of adjacency list 	  in terms of Vectors. So that we only give 
+
+
+	- We have
