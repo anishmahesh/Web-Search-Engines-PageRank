@@ -25,15 +25,15 @@ public class PseudoRelevance {
         _indexer = indexer;
     }
 
-    public void queryRepresentation(Vector<ScoredDocument> Results, int numTerms) throws IOException {
+    public Vector<TermObject> queryRepresentation(Vector<ScoredDocument> Results, int numTerms) throws IOException {
         for (ScoredDocument scoredDoc : Results) {
             Document doc = scoredDoc._doc;
             loadDataToPostingListForDoc(doc);
-            printProbability(numTerms);
         }
+        return printProbability(numTerms);
     }
 
-    public void printProbability(int numTems){
+    public Vector<TermObject> printProbability(int numTems){
         //Contains a term object which has term and the terms probability, could be sorted using the terms probability
         Vector <TermObject> termProbability = new Vector<TermObject>();
         int  totalTermFrequency = totalTermFrequency();
@@ -47,9 +47,15 @@ public class PseudoRelevance {
         for (int i = 0; i < termProbability.size() && i < numTems; ++i) {
             totalProbability += termProbability.get(i)._termProbability;
         }
+
+        Vector<TermObject> response = new Vector<>();
         for (int i = 0; i < termProbability.size() && i < numTems; ++i) {
-            System.out.println(termProbability.get(i)._term + " " + (termProbability.get(i)._termProbability)/totalProbability);
+            TermObject termObject = termProbability.get(i);
+            termObject._termProbability = (termObject._termProbability)/totalProbability;
+            response.add(new TermObject(termObject._term, termObject._termProbability));
         }
+
+        return response;
     }
 
     private int totalTermFrequency(){
@@ -72,17 +78,15 @@ public class PseudoRelevance {
 
             Vector<Integer> numbers = IndexCompressor.vByteDecoder(vb);
             int i = 0;
-            int lastTerm = 0;
             int docId = numbers.get(i++);
             while (i < numbers.size()) {
-                int num = numbers.get(i) + lastTerm;
+                int num = numbers.get(i);
                 String mapKey = ((IndexerInvertedCompressed)_indexer)._terms.get(num);
                 if (_term.containsKey(mapKey)) {
                     _term.put(mapKey, _term.get(mapKey) + numbers.get(i + 1));
                 } else {
                     _term.put(mapKey, numbers.get(i + 1));
                 }
-                lastTerm = num;
                 i += 2;
             }
         }

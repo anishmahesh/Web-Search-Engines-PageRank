@@ -65,7 +65,7 @@ class QueryHandler implements HttpHandler {
         String val = keyval[1];
         if (key.equals("query")) {
           _query = val;
-        } else if (key.equals("num") || key.equals("numDocs")) {
+        } else if (key.equals("num") || key.toLowerCase().equals("numdocs")) {
           try {
             _numResults = Integer.parseInt(val);
           } catch (NumberFormatException e) {
@@ -83,7 +83,7 @@ class QueryHandler implements HttpHandler {
           } catch (IllegalArgumentException e) {
             // Ignored, search engine should never fail upon invalid user input.
           }
-        } else if ( key.equals("numTerms")){
+        } else if ( key.toLowerCase().equals("numterms")){
           try {
             _numTerms = Integer.parseInt(val);
           } catch (NumberFormatException e){
@@ -120,6 +120,13 @@ class QueryHandler implements HttpHandler {
       response.append(doc.asTextResult());
     }
     response.append(response.length() > 0 ? "\n" : "");
+  }
+
+  private void constructTextOutputForPrf(
+          final Vector<PseudoRelevance.TermObject> terms, StringBuffer response) {
+    for (PseudoRelevance.TermObject termObject : terms) {
+      response.append(termObject._term).append("\t").append(termObject._termProbability).append("\n");
+    }
   }
 
   public void handle(HttpExchange exchange) throws IOException {
@@ -180,21 +187,24 @@ class QueryHandler implements HttpHandler {
               ranker.runQuery(processedQuery, cgiArgs._numResults);
     }
 
+    StringBuffer response = new StringBuffer();
+
     if (uriPath.toLowerCase().equals("/prf")) {
       PseudoRelevance pseudoRelevance = new PseudoRelevance(SearchEngine.OPTIONS, _indexer);
-      pseudoRelevance.queryRepresentation(scoredDocs, cgiArgs._numTerms);
+      Vector<PseudoRelevance.TermObject> termObjects = pseudoRelevance.queryRepresentation(scoredDocs, cgiArgs._numTerms);
+      constructTextOutputForPrf(termObjects, response);
     }
-
-    StringBuffer response = new StringBuffer();
-    switch (cgiArgs._outputFormat) {
-    case TEXT:
-      constructTextOutput(scoredDocs, response);
-      break;
-    case HTML:
-      // @CS2580: Plug in your HTML output
-      break;
-    default:
-      // nothing
+    else {
+      switch (cgiArgs._outputFormat) {
+        case TEXT:
+          constructTextOutput(scoredDocs, response);
+          break;
+        case HTML:
+          // @CS2580: Plug in your HTML output
+          break;
+        default:
+          // nothing
+      }
     }
     respondWithMsg(exchange, response.toString());
     System.out.println("Finished query: " + cgiArgs._query);
