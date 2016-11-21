@@ -180,8 +180,10 @@ class QueryHandler implements HttpHandler {
               ranker.runQuery(processedQuery, cgiArgs._numResults);
     }
 
-    PseudoRelevance pseudoRelevance = new PseudoRelevance( SearchEngine.OPTIONS, _indexer);
-    pseudoRelevance.queryRepresentation(scoredDocs, cgiArgs._numTerms);
+    if (uriPath.toLowerCase().equals("/prf")) {
+      PseudoRelevance pseudoRelevance = new PseudoRelevance(SearchEngine.OPTIONS, _indexer);
+      pseudoRelevance.queryRepresentation(scoredDocs, cgiArgs._numTerms);
+    }
 
     StringBuffer response = new StringBuffer();
     switch (cgiArgs._outputFormat) {

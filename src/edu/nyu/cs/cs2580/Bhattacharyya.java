@@ -4,7 +4,6 @@ import edu.nyu.cs.cs2580.SearchEngine.Options;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.DoubleSummaryStatistics;
 import java.util.HashMap;
 import java.util.Scanner;
 
