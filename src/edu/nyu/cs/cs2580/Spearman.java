@@ -20,7 +20,11 @@ public class Spearman {
 
     public static void main (String[] args) throws IOException, ClassNotFoundException {
         Spearman sp = new Spearman(new Options("conf/engine.conf"));
-        sp.loadData(args[0], args[1]);
+        if(args.length <= 0) {
+            sp.loadData(args[0], args[1]);
+        } else {
+            sp.loadData("", "");
+        }
         System.out.println(sp.computeSpearman());
     }
 
@@ -47,7 +51,7 @@ public class Spearman {
     }
 
     public void loadData(String pageRank, String numviews) throws IOException, ClassNotFoundException {
-        if(pageRank.length() < 0) {
+        if(pageRank.length() <= 0) {
             CorpusAnalyzerPagerank corpusAnalyzerPagerank = new CorpusAnalyzerPagerank(new Options("conf/engine.conf"));
             Map<String, Double> _pageRank = corpusAnalyzerPagerank.load();
             _pageRankData = MapToObjectVector(_pageRank);
@@ -69,7 +73,7 @@ public class Spearman {
             }
         }
 
-        if(numviews.length() < 0) {
+        if(numviews.length() <= 0) {
             LogMinerNumviews logMinerNumviews = new LogMinerNumviews(new Options("conf/engine.conf"));
             Map<String, Double> _numViews = logMinerNumviews.load();
             _numViewsData = MapToObjectVector(_numViews);

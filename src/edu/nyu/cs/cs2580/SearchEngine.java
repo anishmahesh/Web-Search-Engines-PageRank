@@ -50,6 +50,8 @@ public class SearchEngine {
     // HW2/HW3: We have a partial Wikipedia dump.
     public String _corpusPrefix = null;
 
+    public String _dataPrefix =null;
+
     // The parent path where the log date reside.
     // HW1/HW2: n/a
     // HW3: We have a partial Wikipedia visit log dump.
@@ -98,6 +100,9 @@ public class SearchEngine {
       // Populate global options.
       _corpusPrefix = options.get("corpus_prefix");
       Check(_corpusPrefix != null, "Missing option: corpus_prefix!");
+
+      _dataPrefix = options.get("data_prefix");
+      Check(_dataPrefix != null, "Missing option: data_prefix");
       _logPrefix = options.get("log_prefix");
       Check(_logPrefix != null, "Missing option: log_prefix!");
       _indexPrefix = options.get("index_prefix");

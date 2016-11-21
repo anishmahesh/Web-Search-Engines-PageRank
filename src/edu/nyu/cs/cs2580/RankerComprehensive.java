@@ -87,9 +87,9 @@ public class RankerComprehensive extends Ranker {
 
     }
 
-    docCompScore = queryLikelyhoodProbability * 0.65;
-    docCompScore += 0.000039*(pageRank/maxPageRank);
-    docCompScore += 0.000001*(numviews/maxNumViews);
+    docCompScore = queryLikelyhoodProbability * 0.85;
+    docCompScore += 0.000022*(pageRank/maxPageRank);
+    docCompScore += 0.0000001*(numviews/maxNumViews);
     //docConjScore = Math.pow(2, docConjScore);
 
     return new ScoredDocument(doc, docCompScore);
