@@ -1,5 +1,9 @@
 package edu.nyu.cs.cs2580;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.Collections;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -71,12 +75,23 @@ public class RankerComprehensive extends Ranker {
     }
     float pageRank = doc.getPageRank();
     int numviews = doc.getNumViews();
-    double docConjScore =0.0;
-    docConjScore = queryLikelyhoodProbability * 0.65;
-    docConjScore += 0.39*(Math.log(pageRank) / Math.log(2));
-    docConjScore += 0.0001*(Math.log(numviews) / Math.log(2));
-    docConjScore = Math.pow(2, docConjScore);
+    double docCompScore =0.0;
+    float maxPageRank = 1.0f;
+    float maxNumViews = 1;
+    try {
+      String maxVal = _options._corpusPrefix + "maxVals.txt";
+      BufferedReader reader = new BufferedReader(new FileReader(maxVal));
+      maxNumViews = Integer.parseInt(reader.readLine());
+      maxPageRank = Float.parseFloat(reader.readLine());
+    }catch (Exception e){
 
-    return new ScoredDocument(doc, docConjScore);
+    }
+
+    docCompScore = queryLikelyhoodProbability * 0.65;
+    docCompScore += 0.000039*(pageRank/maxPageRank);
+    docCompScore += 0.000001*(numviews/maxNumViews);
+    //docConjScore = Math.pow(2, docConjScore);
+
+    return new ScoredDocument(doc, docCompScore);
   }
 }
