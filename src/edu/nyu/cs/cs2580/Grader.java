@@ -1,5 +1,7 @@
 package edu.nyu.cs.cs2580;
 
+import java.util.*;
+
 /**
  * Grading criteria.
  * 
@@ -39,5 +41,24 @@ public class Grader {
     _ranker = ranker;
   }
 
-  public static void main(String[] args) { }
+  public static void main(String[] args) {
+    A a = new B();
+    a.print();
+  }
+
+  static class A{
+    public void print() {
+      System.out.println("in A");
+    }
+  }
+
+  static class B extends A{
+
+    public B() {
+    }
+
+    public void print() {
+      System.out.println("in B");
+    }
+  }
 }

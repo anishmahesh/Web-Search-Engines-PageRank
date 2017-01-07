@@ -744,6 +744,8 @@ public class IndexerInvertedCompressed extends Indexer implements Serializable {
   }
 
   private void loadIndexOnFlyForTerm(String term) throws IOException, ClassNotFoundException {
+    _postings.clear();
+    _skipList.clear();
     int termId = _dictionary.get(term);
     loadMiniIndex(termId/TERM_COUNT_FOR_INDEX_SPLIT);
   }

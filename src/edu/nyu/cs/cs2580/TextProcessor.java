@@ -10,7 +10,7 @@ public class TextProcessor {
             "\\p{Punct}",
             "[\\s][^\\s][\\s]"};
 
-    private static final String[] stopWords = {"the","or","and","be","of","for","to","is","was","it","has","had","etc","shall","a","but","him","his","if","an","in"};
+    private static final String[] stopWords = {"the","or","and","be","of","as","from","that","for","to","is","was","it","has","had","etc","shall","a","but","him","his","if","an","in"};
 
     public static String regexRemoval(String _text){
         for(String regex : removalRegex){
